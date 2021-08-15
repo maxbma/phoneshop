@@ -26,23 +26,24 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 public class JdbcProductDaoIntTest {
 
     private final static int PHONES_AMOUNT_IN_DB = 5;
+    private final static String ORDER="id asc";
 
     @Autowired
     private JdbcPhoneDao phoneDao;
 
     @Test
     public void testPhonesAmount(){
-        assertEquals(phoneDao.findAll(0,Integer.MAX_VALUE).size(), PHONES_AMOUNT_IN_DB);
+        assertEquals(PHONES_AMOUNT_IN_DB,phoneDao.findAll(ORDER,0,Integer.MAX_VALUE).size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFindWithNegativeOffset(){
-        phoneDao.findAll(-1, 5);
+        phoneDao.findAll(ORDER,-1, 5);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFindWithNegativeLimit(){
-        phoneDao.findAll(0, -5);
+        phoneDao.findAll(ORDER,0, -5);
     }
 
     @Test
@@ -145,7 +146,7 @@ public class JdbcProductDaoIntTest {
         phone.setId(1002L);
         phone.setBrand("ARCHOS");
         phone.setModel("ARCHOS 101 Internet Tablet");
-        phone.setPrice(null);
+        phone.setPrice(new BigDecimal("199.0"));
         phone.setDisplaySizeInches(new BigDecimal("10.1"));
         phone.setWeightGr(482);
         phone.setLengthMm(null);
