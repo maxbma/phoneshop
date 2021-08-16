@@ -1,5 +1,6 @@
 package com.es.phoneshop.web.controller.pages;
 
+import com.es.core.cart.CartService;
 import com.es.core.model.phone.Color;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.PhoneDao;
@@ -19,6 +20,9 @@ import java.util.List;
 public class ProductListPageController {
     @Resource
     private PhoneDao phoneDao;
+
+    @Resource
+    private CartService cartService;
 
     @Resource
     private PageService pageService;
@@ -44,6 +48,8 @@ public class ProductListPageController {
         model.addAttribute("order", order);
         model.addAttribute("total", totalPages);
         model.addAttribute("page", page);
+        model.addAttribute("itemsAmount", cartService.getItemsAmount());
+        model.addAttribute("overallPrice", cartService.getOverallPrice());
         model.addAttribute("pagesNumeration", pageService.getPagesNumeration(page, totalPages));
         return "productList";
     }

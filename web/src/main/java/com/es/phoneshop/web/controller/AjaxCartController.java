@@ -13,11 +13,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -45,31 +43,23 @@ public class AjaxCartController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public String addPhone(@RequestParam(required = false, defaultValue = "1") int page,
-                           @RequestParam(required = false, defaultValue = "id asc") String order,
-                           @RequestParam(required = false) String search,
-                           @Valid CartItem cartItem,
-                           BindingResult bindingResult,
-                           HttpSession session,
-                           Model model) {
+    public ModelAndView addPhone(@Valid CartItem cartItem,
+                           BindingResult bindingResult) {
+        ModelAndView modelAndView = new ModelAndView(new MappingJackson2JsonView());
         if(bindingResult.hasErrors()) {
             String msg = bindingResult.getFieldError().getDefaultMessage();
-            session.setAttribute("error", msg);
-            session.setAttribute("errorId", cartItem.getPhoneId());
+            modelAndView.addObject("errorMsg", msg);
+            modelAndView.addObject("errorId", cartItem.getPhoneId());
         } else{
             try{
                 cartService.addPhone(cartItem.getPhoneId(), Long.parseLong(cartItem.getQuantity()));
-                session.setAttribute("itemsAmount", cartService.getItemsAmount());
-                session.setAttribute("overallPrice", cartService.getOverallPrice());
+                modelAndView.addObject("itemsAmount", cartService.getItemsAmount());
+                modelAndView.addObject("overallPrice", cartService.getOverallPrice());
             } catch (OutOfStockException e){
-                session.setAttribute("error", e.getMessage());
-                session.setAttribute("errorId", cartItem.getPhoneId());
+                modelAndView.addObject("errorMsg", e.getMessage());
+                modelAndView.addObject("errorId", cartItem.getPhoneId());
             }
         }
-
-        if(search!=null) model.addAttribute("search", search);
-        model.addAttribute("page", page);
-        model.addAttribute("order", order);
-        return "redirect:/productList";
+        return modelAndView;
     }
 }

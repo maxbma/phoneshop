@@ -4,6 +4,7 @@
 <html>
 <head>
   <title>Phone shop</title>
+  <jsp:include page="header.jsp" />
   <style>
     .tbl {
       width: 100%;
@@ -58,18 +59,6 @@
 </head>
 
 <body>
-<img src="https://cdn.iconscout.com/icon/free/png-256/smartphone-1703329-1446727.png" height="40px"/>
-<b style="font-size: 40px; font-weight: bolder; margin-left: 5px; font-family: 'Calibri Light'">Phonify</b>
-<form method="get">
-  <c:if test="${sessionScope.containsKey(\"itemsAmount\")}">
-    <input type="submit" style="float: right; margin-right: 10px" value="My cart: ${itemsAmount} items ${overallPrice}$" />
-  </c:if>
-  <c:if test="${sessionScope.containsKey(\"itemsAmount\") == false}" >
-    <input type="submit" style="float: right; margin-right: 10px" value="My cart: 0 items 0$" />
-  </c:if>
-</form>
-<br/>
-<hr/>
 <b align="left" style="font-size: 30px; margin-left: 20px">Phones</b>
 <form method="get">
   <input style="margin-left: 50px" type="text" name="search"/>
@@ -128,22 +117,14 @@
       </td>
       <td>${phone.displaySizeInches}"</td>
       <td>$ ${phone.price}</td>
-      <form method="post" action="${contextUrl}ajaxCart">
+      <form>
         <td>
           <input type="text" name="quantity" value="1"/>
-
-          <c:if test="${phone.id == errorId}">
-            <p style="color: red">${error}</p>
-            ${sessionScope.remove("error")}
-            ${sessionScope.remove("errorId")}
-          </c:if>
+          <p id="error${phone.id}" style="color: red"></p>
         </td>
         <td>
           <input type="hidden" name="phoneId" value="${phone.id}"/>
-          <input type="hidden" name="page" value="${page}" />
-          <input type="hidden" name="order" value="${order}" />
-          <input type="hidden" name="search" value="${search}" />
-          <input type="submit" class="btn-class" value="Add to" />
+          <input value="Add to cart" onclick="submitForm(this.form)" type="button">
         </td>
       </form>
     </tr>
@@ -169,8 +150,6 @@
     <td> <a href="?page=${total}&order=${order}&search=${search}" style="text-decoration: none; color: black"> >> </a> </td>
   </tr>
 </table>
-
-
 <br/>
 </body>
 </html>

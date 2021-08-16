@@ -1,7 +1,8 @@
 package com.es.core.cart;
 
 public class CartItem {
-    private Long phoneId;    private String quantity;
+    private Long phoneId;
+    private String quantity;
 
     public Long getPhoneId() {
         return phoneId;
