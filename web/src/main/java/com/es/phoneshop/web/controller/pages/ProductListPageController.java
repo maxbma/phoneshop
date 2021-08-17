@@ -5,11 +5,15 @@ import com.es.core.model.phone.Color;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.PhoneDao;
 import com.es.core.page.PageService;
+import com.es.phoneshop.web.controller.validator.ValidOrder;
+import com.es.phoneshop.web.controller.validator.ValidOrderItem;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.annotation.Resource;
 import java.util.HashSet;
@@ -27,24 +31,26 @@ public class ProductListPageController {
     @Resource
     private PageService pageService;
 
-    private final static int PAGE_LIMIT = 10;
+    public final static int PAGE_LIMIT = PageService.PAGE_LIMIT;
 
     @RequestMapping(method = RequestMethod.GET)
     public String showProductList(Model model,
-                                  @RequestParam(required = false, defaultValue = "1") int page,
-                                  @RequestParam(required = false, defaultValue = "id asc") String order,
-                                  @RequestParam(required = false) String search) {
-        int offset = (page-1)*PAGE_LIMIT;
+                                          @RequestParam(required = false, defaultValue = "1") int page,
+                                          @RequestParam(required = false, defaultValue = "id asc") String order,
+                                          @RequestParam(required = false) String search) {
+        if(!isUrlValid(order)) return "redirect:/error";
         int totalPages;
         List<Phone> phones;
         totalPages = pageService.getPagesAmount(search);
+        if(page < 1 || page > totalPages) return "redirect:/error";
+        int offset = (page-1)*PAGE_LIMIT;
         if(search == null){
             phones = phoneDao.findAll(order, offset, PAGE_LIMIT);
         } else {
             phones = phoneDao.findSearchedPhones(search, order, offset, PAGE_LIMIT);
         }
         if(search!=null) model.addAttribute("search", search);
-        model.addAttribute("phones", setColors(phones));
+        model.addAttribute("phones", phones);
         model.addAttribute("order", order);
         model.addAttribute("total", totalPages);
         model.addAttribute("page", page);
@@ -54,10 +60,20 @@ public class ProductListPageController {
         return "productList";
     }
 
-    private List<Phone> setColors(List<Phone> phoneList){
-        for(Phone phone : phoneList){
-            phone.setColors(new HashSet<Color>(phoneDao.getPhoneColors(phone.getId())));
+    private boolean isUrlValid(String orderUrl){
+        String[] parts = orderUrl.split(" ");
+        boolean validOrderItem= false, validOrder = false;
+        for (ValidOrderItem item : ValidOrderItem.values()){
+            if(item.name().equalsIgnoreCase(parts[0])) {
+                validOrderItem = true;
+                break;
+            }
         }
-        return phoneList;
+        for(ValidOrder order : ValidOrder.values()){
+            if(order.name().equalsIgnoreCase(parts[1])){
+                return validOrderItem;
+            }
+        }
+        return false;
     }
 }

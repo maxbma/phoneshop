@@ -8,7 +8,7 @@ public interface PhoneDao {
     Optional<Phone> get(Long key);
     void save(Phone phone);
     List<Phone> findAll(String order, int offset, int limit);
-    List<Color> getPhoneColors(Long id);
+    List<Phone> getPhonesById(List<Long> idList);
     int getPhonesAmount();
     int getSearchedPhonesAmount(String search);
     List<Phone> findSearchedPhones(String search, String order, int offset, int limit);

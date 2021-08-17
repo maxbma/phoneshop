@@ -18,7 +18,7 @@ public class CartValidator implements Validator {
         CartItem cartItem = (CartItem) o;
         try {
             if (cartItem.getQuantity() == null) errors.rejectValue("quantity", "nullQ", "Fill this field");
-            else if (Integer.parseInt(cartItem.getQuantity()) < 1)
+            else if (cartItem.getQuantity() < 1)
                 errors.rejectValue("quantity", "negQ", "Quantity should be more 0");
         } catch (NumberFormatException e){
             errors.rejectValue("quantity", "numbQ", "Wrong format");
