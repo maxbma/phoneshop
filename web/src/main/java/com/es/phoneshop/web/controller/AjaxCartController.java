@@ -3,7 +3,6 @@ package com.es.phoneshop.web.controller;
 import com.es.core.cart.CartItem;
 import com.es.core.cart.CartService;
 import com.es.core.order.OutOfStockException;
-import com.es.core.page.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -26,9 +25,6 @@ public class AjaxCartController {
     @Resource
     private CartService cartService;
 
-    @Resource
-    private PageService pageService;
-
     @Autowired
     @Qualifier("cartValidator")
     private Validator cartValidator;
@@ -48,7 +44,7 @@ public class AjaxCartController {
             modelAndView.addObject("errorId", cartItem.getPhoneId());
         } else{
             try{
-                cartService.addPhone(cartItem.getPhoneId(), Long.parseLong(cartItem.getQuantity()));
+                cartService.addPhone(cartItem.getPhoneId(), cartItem.getQuantity());
                 modelAndView.addObject("itemsAmount", cartService.getItemsAmount());
                 modelAndView.addObject("overallPrice", cartService.getOverallPrice());
             } catch (OutOfStockException e){

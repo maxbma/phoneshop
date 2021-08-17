@@ -11,9 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
@@ -42,6 +40,31 @@ public class JdbcProductDaoIntTest {
     @Test(expected = IllegalArgumentException.class)
     public void testFindWithNegativeLimit(){
         phoneDao.findAll(ORDER,0, -5);
+    }
+
+    @Test
+    public void testSearchPhone(){
+        String search = "ARCHOS 101 Internet Tablet";
+        List<Phone> actual = phoneDao.findSearchedPhones(search, ORDER, 0, 10);
+        List<Phone> expected = new ArrayList<>();
+        expected.add(expectedPhone());
+        assertPhonesEqual(actual.get(0), expected.get(0));
+    }
+
+    @Test
+    public void testSearchNonExistingPhone(){
+        String search = "Xiaomi";
+        List<Phone> expected = Collections.EMPTY_LIST;
+        List<Phone> actual = phoneDao.findSearchedPhones(search,ORDER, 0, 10);
+        assertEquals(expected,actual);
+    }
+
+    @Test
+    public void testPhoneStockAmount(){
+        int expected = 11;
+        int actual = phoneDao.getPhoneStockAmount(1002L);
+        assertEquals(actual,expected);
+
     }
 
     @Test

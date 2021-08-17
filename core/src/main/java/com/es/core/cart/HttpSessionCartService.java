@@ -1,6 +1,7 @@
 package com.es.core.cart;
 
 import com.es.core.model.phone.JdbcPhoneDao;
+import com.es.core.model.phone.Phone;
 import com.es.core.order.OutOfStockException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -8,17 +9,23 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class HttpSessionCartService implements CartService {
 
+    private Lock lock = new ReentrantLock();
+
     @Resource
     private JdbcPhoneDao phoneDao;
 
-    private Cart cart = new Cart();
+    private final Cart cart = new Cart();
 
     @Override
     public Cart getCart() {
@@ -28,10 +35,15 @@ public class HttpSessionCartService implements CartService {
     @Override
     public void addPhone(Long phoneId, Long quantity) throws OutOfStockException {
         if(!isEnoughStock(phoneId, quantity)) throw new OutOfStockException("Out of stock");
-        Map<Long, Long> items = cart.getItems();
-        Long previousQuantity = items.get(phoneId);
-        if(previousQuantity == null) previousQuantity = 0L;
-        items.put(phoneId, previousQuantity + quantity);
+        lock.lock();
+        try{
+            Map<Long, Long> items = cart.getItems();
+            Long previousQuantity = items.get(phoneId);
+            if(previousQuantity == null) previousQuantity = 0L;
+            items.put(phoneId, previousQuantity + quantity);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -46,9 +58,15 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public boolean isEnoughStock(Long phoneId, Long quantity){
-        Long prevQuantity = cart.getItems().get(phoneId);
-        if(prevQuantity == null) prevQuantity = 0L;
-        return quantity + prevQuantity <= phoneDao.getPhoneStockAmount(phoneId);
+        int stockAmount = phoneDao.getPhoneStockAmount(phoneId);
+        lock.lock();
+        try{
+            Long prevQuantity = cart.getItems().get(phoneId);
+            if(prevQuantity == null) prevQuantity = 0L;
+            return quantity + prevQuantity <= stockAmount;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -64,8 +82,10 @@ public class HttpSessionCartService implements CartService {
     @Override
     public int getOverallPrice(){
         BigDecimal price = new BigDecimal(0);
-        for(Map.Entry<Long,Long> entry : cart.getItems().entrySet()){
-            price = price.add(phoneDao.get(entry.getKey()).get().getPrice().multiply(new BigDecimal(entry.getValue())));
+        Map<Long,Long> items = cart.getItems();
+        List<Phone> phoneList = phoneDao.getPhonesById(new ArrayList<>(cart.getItems().keySet()));
+        for(Phone phone : phoneList){
+            price = price.add(phone.getPrice().multiply(new BigDecimal(items.get(phone.getId()))));
         }
         return price.intValue();
     }
