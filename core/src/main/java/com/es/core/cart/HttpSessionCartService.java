@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -34,9 +31,10 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public void addPhone(Long phoneId, Long quantity) throws OutOfStockException {
-        if(!isEnoughStock(phoneId, quantity)) throw new OutOfStockException("Out of stock");
+        int stockAmount = phoneDao.getPhoneStockAmount(phoneId);
         lock.lock();
         try{
+            if(!isEnoughStock(phoneId, quantity, stockAmount)) throw new OutOfStockException("Out of stock");
             Map<Long, Long> items = cart.getItems();
             Long previousQuantity = items.get(phoneId);
             if(previousQuantity == null) previousQuantity = 0L;
@@ -57,16 +55,10 @@ public class HttpSessionCartService implements CartService {
     }
 
     @Override
-    public boolean isEnoughStock(Long phoneId, Long quantity){
-        int stockAmount = phoneDao.getPhoneStockAmount(phoneId);
-        lock.lock();
-        try{
-            Long prevQuantity = cart.getItems().get(phoneId);
-            if(prevQuantity == null) prevQuantity = 0L;
-            return quantity + prevQuantity <= stockAmount;
-        } finally {
-            lock.unlock();
-        }
+    public boolean isEnoughStock(Long phoneId, Long quantity, int stockAmount){
+        Long prevQuantity = cart.getItems().get(phoneId);
+        if(prevQuantity == null) prevQuantity = 0L;
+        return quantity + prevQuantity <= stockAmount;
     }
 
     @Override
@@ -82,8 +74,8 @@ public class HttpSessionCartService implements CartService {
     @Override
     public int getOverallPrice(){
         BigDecimal price = new BigDecimal(0);
-        Map<Long,Long> items = cart.getItems();
-        List<Phone> phoneList = phoneDao.getPhonesById(new ArrayList<>(cart.getItems().keySet()));
+        Map<Long,Long> items = new HashMap<>(cart.getItems());
+        List<Phone> phoneList = phoneDao.getPhonesById(new ArrayList<>(items.keySet()));
         for(Phone phone : phoneList){
             price = price.add(phone.getPrice().multiply(new BigDecimal(items.get(phone.getId()))));
         }
