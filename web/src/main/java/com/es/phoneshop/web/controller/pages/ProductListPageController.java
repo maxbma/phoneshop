@@ -1,23 +1,21 @@
 package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.cart.CartService;
-import com.es.core.model.phone.Color;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.PhoneDao;
 import com.es.core.page.PageService;
 import com.es.phoneshop.web.controller.validator.ValidOrder;
 import com.es.phoneshop.web.controller.validator.ValidOrderItem;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.annotation.Resource;
-import java.util.HashSet;
 import java.util.List;
+
+import static com.es.core.page.PageService.PAGE_LIMIT;
 
 @Controller
 @RequestMapping (value = "/productList")
@@ -30,8 +28,6 @@ public class ProductListPageController {
 
     @Resource
     private PageService pageService;
-
-    public final static int PAGE_LIMIT = PageService.PAGE_LIMIT;
 
     @RequestMapping(method = RequestMethod.GET)
     public String showProductList(Model model,

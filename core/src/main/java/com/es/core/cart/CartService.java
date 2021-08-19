@@ -9,15 +9,9 @@ public interface CartService {
     Cart getCart();
 
     void addPhone(Long phoneId, Long quantity) throws OutOfStockException;
-
-    /**
-     * @param items
-     * key: {@link com.es.core.model.phone.Phone#id}
-     * value: quantity
-     */
     void update(Map<Long, Long> items);
     void remove(Long phoneId);
-    boolean isEnoughStock(Long phoneId, Long quantity);
+    boolean isEnoughStock(Long phoneId, Long quantity, int stockAmount);
     long getItemsAmount();
     int getOverallPrice();
 
