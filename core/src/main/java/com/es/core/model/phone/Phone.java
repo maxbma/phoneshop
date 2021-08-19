@@ -11,6 +11,29 @@ public class Phone {
     private String model;
     private BigDecimal price;
 
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj) return true;
+        if(obj == null || obj.getClass() != this.getClass()) return false;
+        Phone phone = (Phone) obj;
+        return id.equals(phone.getId()) && brand.equals(phone.getBrand()) && model.equals(phone.getModel()) &&
+                price.equals(phone.getPrice()) && displaySizeInches.equals(phone.getDisplaySizeInches()) &&
+                weightGr.equals(phone.getWeightGr()) && lengthMm.equals(phone.getLengthMm()) && widthMm.equals(phone.getWidthMm()) &&
+                heightMm.equals(phone.getHeightMm()) && announced.equals(phone.getAnnounced()) && deviceType.equals(phone.getDeviceType()) &&
+                os.equals(phone.getOs()) && displayResolution.equals(phone.getDisplayResolution()) && pixelDensity.equals(phone.getPixelDensity()) &&
+                displayTechnology.equals(phone.getDisplayTechnology()) && backCameraMegapixels.equals(phone.getBackCameraMegapixels()) &&
+                frontCameraMegapixels.equals(phone.getFrontCameraMegapixels()) && ramGb.equals(phone.getRamGb()) &&
+                internalStorageGb.equals(phone.getInternalStorageGb()) && batteryCapacityMah.equals(phone.getBatteryCapacityMah()) &&
+                talkTimeHours.equals(phone.getTalkTimeHours()) && standByTimeHours.equals(phone.getStandByTimeHours()) &&
+                bluetooth.equals(phone.getBluetooth()) && positioning.equals(phone.getPositioning()) &&
+                imageUrl.equals(phone.getImageUrl()) && description.equals(phone.getDescription());
+    }
+
+    @Override
+    public int hashCode(){
+        return 31*id.intValue() + brand.hashCode() - model.hashCode() + 31*price.intValue();
+    }
+
     private BigDecimal displaySizeInches;
 
     private Integer weightGr;
