@@ -50,13 +50,23 @@ public class HttpSessionCartService implements CartService {
     }
 
     @Override
-    public void update(Map<Long, Long> items) {
-        throw new UnsupportedOperationException("TODO");
+    public void update(Map<Long, Long> items) throws OutOfStockException{
+        Map<Long, Long> prevCart = new HashMap<>(cart.getItems());
+        int itemNumberInCart = 0;
+        for(Map.Entry<Long,Long> entry : items.entrySet()){
+            if(!prevCart.containsKey(entry.getKey()) || !prevCart.get(entry.getKey()).equals(entry.getValue())){
+                long phoneId = entry.getKey(), quantity = entry.getValue();
+                int stockAmount = phoneDao.getPhoneStockAmount(phoneId);
+                if(quantity > stockAmount) throw new OutOfStockException("Out of stock:"+itemNumberInCart);
+                cart.getItems().put(phoneId,quantity);
+            }
+            itemNumberInCart++;
+        }
     }
 
     @Override
     public void remove(Long phoneId) {
-        throw new UnsupportedOperationException("TODO");
+        cart.getItems().remove(phoneId);
     }
 
     @Override
@@ -85,6 +95,17 @@ public class HttpSessionCartService implements CartService {
             price = price.add(phone.getPrice().multiply(new BigDecimal(items.get(phone.getId()))));
         }
         return price.intValue();
+    }
+
+    @Override
+    public Map<Phone, Long> getPhoneMap() {
+        Map<Phone, Long> phoneMap = new HashMap<>();
+        Map<Long,Long> items = cart.getItems();
+        List<Phone> phoneList = phoneDao.getPhonesById(new ArrayList<>(items.keySet()));
+        for(Phone phone : phoneList){
+            phoneMap.put(phone, items.get(phone.getId()));
+        }
+        return phoneMap;
     }
 }
 
