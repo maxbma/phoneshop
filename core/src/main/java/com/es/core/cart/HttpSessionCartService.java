@@ -29,6 +29,11 @@ public class HttpSessionCartService implements CartService {
         return cart;
     }
 
+    public HttpSessionCartService(){}
+    public HttpSessionCartService(JdbcPhoneDao phoneDao){
+        this.phoneDao = phoneDao;
+    }
+
     @Override
     public void addPhone(Long phoneId, Long quantity) throws OutOfStockException {
         int stockAmount = phoneDao.getPhoneStockAmount(phoneId);
