@@ -1,6 +1,7 @@
 package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.cart.CartService;
+import com.es.core.cart.CartTotal;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.PhoneDao;
 import com.es.core.page.PageService;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.es.core.page.PageService.PAGE_LIMIT;
 
@@ -50,8 +53,10 @@ public class ProductListPageController {
         model.addAttribute("order", order);
         model.addAttribute("total", totalPages);
         model.addAttribute("page", page);
-        model.addAttribute("itemsAmount", cartService.getItemsAmount());
-        model.addAttribute("overallPrice", cartService.getOverallPrice());
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        model.addAttribute("itemsAmount", cartTotal.getItemsAmount());
+        model.addAttribute("overallPrice", cartTotal.getOverallPrice());
         model.addAttribute("pagesNumeration", pageService.getPagesNumeration(page, totalPages));
         return "productList";
     }

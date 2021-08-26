@@ -2,6 +2,7 @@ package com.es.phoneshop.web.controller;
 
 import com.es.core.cart.CartItem;
 import com.es.core.cart.CartService;
+import com.es.core.cart.CartTotal;
 import com.es.core.order.OutOfStockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +18,8 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Controller
@@ -45,8 +48,10 @@ public class AjaxCartController {
         } else{
             try{
                 cartService.addPhone(cartItem.getPhoneId(), cartItem.getQuantity());
-                modelAndView.addObject("itemsAmount", cartService.getItemsAmount());
-                modelAndView.addObject("overallPrice", cartService.getOverallPrice());
+                Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+                CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+                modelAndView.addObject("itemsAmount", cartTotal.getItemsAmount());
+                modelAndView.addObject("overallPrice", cartTotal.getOverallPrice());
             } catch (OutOfStockException e){
                 modelAndView.addObject("errorMsg", e.getMessage());
                 modelAndView.addObject("errorId", cartItem.getPhoneId());

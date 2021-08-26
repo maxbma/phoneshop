@@ -9,5 +9,13 @@
     <import resource="classpath:context/applicationContext-core.xml"/>
     <import resource="classpath:context/applicationContext-demoda.xml"/>
 
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>messages</value>
+            </list>
+        </property>
+    </bean>
+
 
 </beans>

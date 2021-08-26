@@ -1,6 +1,7 @@
 package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.cart.CartService;
+import com.es.core.cart.CartTotal;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.PhoneDao;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -26,12 +29,14 @@ public class ProductDetailsPageController {
         Optional<Phone> phone = phoneDao.get(id);
 
         if(phone.isPresent()){
+            Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+            CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+            model.addAttribute("itemsAmount", cartTotal.getItemsAmount());
+            model.addAttribute("overallPrice", cartTotal.getOverallPrice());
             model.addAttribute("phone", phone.get());
-            model.addAttribute("itemsAmount", cartService.getItemsAmount());
-            model.addAttribute("overallPrice", cartService.getOverallPrice());
             return "productDetails";
         } else {
-            throw new IllegalArgumentException();
+            return "redirect:/error?error=Phone not found";
         }
     }
 }

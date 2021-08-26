@@ -6,6 +6,7 @@
 </head>
 <body>
 <p>Oops, something went wrong...</p>
+<p style="font-size: large">${error}</p>
 <a href="${contextUrl}productList">Return to product list</a>
 </body>
 </html>

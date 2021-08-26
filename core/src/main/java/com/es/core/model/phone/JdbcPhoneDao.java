@@ -22,9 +22,10 @@ public class JdbcPhoneDao implements PhoneDao{
     private static final String SELECT_SEARCHED_PHONES_AMOUNT = "select count(*) from phones join stocks on phones.id = stocks.phoneId where stocks.stock > 0 and price is not null and upper(phones.model) like upper(?)";
     private static final String SELECT_PHONE_STOCK = "select stock - reserved from stocks where phoneId = ?";
     private static final String SELECT_PHONES_BY_ID_LIST = "select * from phones left join phone2color on phones.id = phone2color.phoneId left join colors on phone2color.colorId = colors.id where phones.id in(%s)";
+    private static final String SELECT_STOCK_LIST = "select stock, reserved, phoneId from stocks where phoneId in (%s)";
 
-
-    private PhoneExtractor phoneExtractor = new PhoneExtractor();
+    private final PhoneExtractor phoneExtractor = new PhoneExtractor();
+    private final StockMapper stockMapper = new StockMapper();
 
     private SimpleJdbcInsert jdbcInsert;
     @Resource
@@ -101,6 +102,22 @@ public class JdbcPhoneDao implements PhoneDao{
             }
             String sql = String.format(SELECT_PHONES_BY_ID_LIST, sb);
             return jdbcTemplate.query(sql, phoneExtractor);
+        }
+    }
+
+    @Override
+    public List<Stock> getStockList(List<Long> idList) {
+        if(idList.isEmpty()){
+            return Collections.emptyList();
+        } else{
+            StringBuffer sb = new StringBuffer();
+            Iterator<Long> iterator = idList.listIterator();
+            while(iterator.hasNext()){
+                sb.append(iterator.next());
+                if(iterator.hasNext()) sb.append(",");
+            }
+            String sql = String.format(SELECT_STOCK_LIST, sb);
+            return jdbcTemplate.query(sql, stockMapper);
         }
     }
 

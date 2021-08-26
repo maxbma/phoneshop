@@ -9,6 +9,7 @@ public interface PhoneDao {
     void save(Phone phone);
     List<Phone> findAll(String order, int offset, int limit);
     List<Phone> getPhonesById(List<Long> idList);
+    List<Stock> getStockList(List<Long> idList);
     int getPhonesAmount();
     int getSearchedPhonesAmount(String search);
     List<Phone> findSearchedPhones(String search, String order, int offset, int limit);
