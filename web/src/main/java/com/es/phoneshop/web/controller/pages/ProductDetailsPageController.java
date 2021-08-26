@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class ProductDetailsPageController {
     private CartService cartService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public String showProductDetails(@PathVariable("id") long id, Model model){
+    public String showProductDetails(@PathVariable("id") long id, Model model, RedirectAttributes redirectAttributes){
         Optional<Phone> phone = phoneDao.get(id);
 
         if(phone.isPresent()){
@@ -36,7 +37,8 @@ public class ProductDetailsPageController {
             model.addAttribute("phone", phone.get());
             return "productDetails";
         } else {
-            return "redirect:/error?error=Phone not found";
+            redirectAttributes.addFlashAttribute("error", "Phone not found");
+            return "redirect:/error";
         }
     }
 }
