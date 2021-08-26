@@ -23,14 +23,12 @@ public class ErrorPageController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String errorPage(Model model,
-                            @RequestParam(required = false, defaultValue = "") String error){
+    public String errorPage(Model model){
 
         Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
         CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
         model.addAttribute("itemsAmount", cartTotal.getItemsAmount());
         model.addAttribute("overallPrice", cartTotal.getOverallPrice());
-        model.addAttribute("error", error);
         return "error";
     }
 }

@@ -59,6 +59,8 @@ public class HttpSessionCartService implements CartService {
             idList.add(item.getPhoneId());
         }
         List<Stock> stocks = phoneDao.getStockList(idList);
+        Map<Long, Stock> stockMap = new HashMap<>(stocks.size());
+        stocks.forEach(stock -> stockMap.put(stock.getPhoneId(), stock));
         lock.lock();
         try{
             Map<Long, Long> prevCart = cart.getItems();
@@ -66,9 +68,7 @@ public class HttpSessionCartService implements CartService {
             for(CartItem item : items){
                 if(!prevCart.containsKey(item.getPhoneId()) || !prevCart.get(item.getPhoneId()).equals(item.getQuantity())){
                     long phoneId = item.getPhoneId(), quantity = item.getQuantity();
-                    Stock stock = stocks.stream().
-                            filter(s -> s.getPhoneId() == phoneId).
-                            findFirst().get();
+                    Stock stock = stockMap.get(phoneId);
                     int stockAmount = stock.getStock() - stock.getReserved();
                     if(quantity > stockAmount) {
                         itemNumbersWithException.add(itemNumberInCart);
