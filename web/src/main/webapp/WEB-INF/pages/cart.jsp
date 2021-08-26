@@ -6,7 +6,7 @@
     <title>Cart</title>
     <jsp:include page="header.jsp"/>
     <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/style.css"/>">
-    <script language="JavaScript" type="text/javascript" src="<c:url value="/resources/js/checkString.js" />"></script>
+    <script language="javascript" type="text/javascript" src="<c:url value="/resources/js/setFormMethod.js"/> "></script>
 </head>
 <body>
 <a href="${contextUrl}productList" style="margin-left: 30px">
@@ -24,7 +24,8 @@
         <th>Action</th>
     </tr>
     </thead>
-    <form:form method="POST" action="${contextUrl}cart/update" modelAttribute="cartUpdateForm">
+    <form:form action="${contextUrl}cart/update" modelAttribute="cartUpdateForm">
+    <input type="hidden" id="meth" name="_method">
     <c:forEach var="phoneEntry" items="${phoneEntrySet}" varStatus="loop">
         <tr>
             <td>${phoneEntry.key.brand}</td>
@@ -40,18 +41,20 @@
                 <form:input path="items[${loop.index}].quantity"/>
                 <br>
                 <form:errors path="items[${loop.index}].quantity" style="color:red" />
-                <b id="error${phoneEntry.key.id}" style="color:red"></b>
                 <form:hidden path="items[${loop.index}].phoneId"/>
             </td>
             <td>
-                <form:button name="delete" value="${phoneEntry.key.id}">Delete</form:button>
+                <form:button name="delete" value="${phoneEntry.key.id}" onclick="setDelete()">Delete</form:button>
             </td>
         </tr>
     </c:forEach>
 </table>
+<script>
+
+</script>
 <div align="right" style="margin-right: 7%">
     <c:if test="${phoneEntrySet.size() > 0}">
-        <input type="submit" name="update" value = "Update" />
+        <input type="submit" name="update" value = "Update" onclick="setPut()"/>
     </c:if>
     </form:form>
     <c:if test="${phoneEntrySet.size() > 0}" >

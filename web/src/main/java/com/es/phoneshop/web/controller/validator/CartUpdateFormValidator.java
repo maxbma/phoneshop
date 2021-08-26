@@ -19,7 +19,7 @@ public class CartUpdateFormValidator implements Validator {
         CartUpdateForm form = (CartUpdateForm) o;
         int itemNumberInCart = 0;
         for(CartItem item : form.getItems()){
-            if (item.getQuantity() == null) errors.rejectValue("items[" + itemNumberInCart + "].quantity", "nullQ", "Fill this field correctly");
+            if (item.getQuantity() == null) errors.rejectValue("items[" + itemNumberInCart + "].quantity", "nullQ","");
             else if (item.getQuantity() < 1)
                 errors.rejectValue("items[" + itemNumberInCart + "].quantity", "negQ", "Quantity should be more 0");
             itemNumberInCart++;

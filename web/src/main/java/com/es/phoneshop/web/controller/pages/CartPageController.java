@@ -2,6 +2,7 @@ package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.cart.CartItem;
 import com.es.core.cart.CartService;
+import com.es.core.cart.CartTotal;
 import com.es.core.model.phone.Phone;
 import com.es.core.order.OutOfStockException;
 import com.es.phoneshop.web.controller.forms.CartUpdateForm;
@@ -13,8 +14,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,55 +42,48 @@ public class CartPageController {
 
     @RequestMapping(method = RequestMethod.GET)
     public String getCart(Model model) {
-        Set<Map.Entry<Phone,Long>> phoneEntrySet = cartService.getPhoneMap().entrySet();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        Set<Map.Entry<Phone,Long>> phoneEntrySet = cartService.getPhoneMap(cartItemsCopy).entrySet();
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        if(!model.containsAttribute("cartUpdateForm")){
+            model.addAttribute("cartUpdateForm", setUpdateForm(phoneEntrySet));
+        }
         model.addAttribute("phoneEntrySet", phoneEntrySet);
-        model.addAttribute("cartUpdateForm", setUpdateForm(phoneEntrySet));
-        model.addAttribute("itemsAmount", cartService.getItemsAmount());
-        model.addAttribute("overallPrice", cartService.getOverallPrice());
+        model.addAttribute("itemsAmount", cartTotal.getItemsAmount());
+        model.addAttribute("overallPrice", cartTotal.getOverallPrice());
         return "cart";
     }
 
-    @RequestMapping(value = "/update",method = RequestMethod.POST)
-    public String updateCart(@RequestParam(name="delete", required = false) Long deleteId,
-                           @ModelAttribute("cartUpdateForm") @Valid CartUpdateForm cartUpdateForm, BindingResult result, Model model) {
-        if(deleteId != null){
-            return deletePhone(deleteId);
-        } else{
-            return updatePhoneCart(cartUpdateForm, result, model);
-        }
+    @RequestMapping(value = "/update",method = RequestMethod.PUT)
+    public String updateCart(@ModelAttribute("cartUpdateForm") @Valid CartUpdateForm cartUpdateForm,
+                             BindingResult result,
+                             RedirectAttributes redirectAttributes) {
+        return updatePhoneCart(cartUpdateForm, result, redirectAttributes);
     }
 
-    private String deletePhone(long phoneId){
+    @RequestMapping(value = "/update",method = RequestMethod.DELETE)
+    public String deletePhoneFromCart(@RequestParam(name="delete", required = false) Long phoneId){
         cartService.remove(phoneId);
         return "redirect:./";
     }
 
-    private void getCartItems(Model model){
-        Set<Map.Entry<Phone,Long>> phoneEntrySet = cartService.getPhoneMap().entrySet();
-        model.addAttribute("phoneEntrySet", phoneEntrySet);
-        model.addAttribute("itemsAmount", cartService.getItemsAmount());
-        model.addAttribute("overallPrice", cartService.getOverallPrice());
-    }
-
-    private String updatePhoneCart(CartUpdateForm form, BindingResult result, Model model){
+    private String updatePhoneCart(CartUpdateForm form, BindingResult result,
+                                   RedirectAttributes redirectAttributes){
         if (result.hasErrors()) {
-            getCartItems(model);
-            return "cart";
+            redirectAttributes.addFlashAttribute("cartUpdateForm", form);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.cartUpdateForm", result);
         } else {
-            Map<Long, Long> items= new HashMap<>();
-            for(CartItem item : form.getItems()){
-                items.put(item.getPhoneId(), item.getQuantity());
-            }
             try{
-                cartService.update(items);
+                cartService.update(form.getItems());
             } catch (OutOfStockException e){
-                String[] errorMessage = e.getMessage().split(":");
-                result.rejectValue("items[" + errorMessage[1] + "].quantity", "outOfStock", errorMessage[0]);
-                getCartItems(model);
-                return "cart";
+                for(Integer number : e.getItemNumbersList()){
+                    result.rejectValue("items[" + number + "].quantity", "outOfStock", e.getMessage());
+                }
+                redirectAttributes.addFlashAttribute("cartUpdateForm", form);
+                redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.cartUpdateForm", result);
             }
-            return "redirect:./";
         }
+        return "redirect:./";
     }
 
     private CartUpdateForm setUpdateForm(Set<Map.Entry<Phone,Long>> entrySet){

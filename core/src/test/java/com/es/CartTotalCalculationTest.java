@@ -1,6 +1,7 @@
 package com.es;
 
 import com.es.core.cart.CartService;
+import com.es.core.cart.CartTotal;
 import com.es.core.cart.HttpSessionCartService;
 import com.es.core.model.phone.JdbcPhoneDao;
 import com.es.core.model.phone.Phone;
@@ -8,22 +9,16 @@ import com.es.core.order.OutOfStockException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration("classpath:context/testContext.xml")
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@RunWith(MockitoJUnitRunner.class)
 public class CartTotalCalculationTest {
 
     private static JdbcPhoneDao phoneDao = mock(JdbcPhoneDao.class);
@@ -91,7 +86,9 @@ public class CartTotalCalculationTest {
         cartService.addPhone(2L, 2L);
         cartService.addPhone(3L, 1L);
 
-        long actualItemsAmount = cartService.getItemsAmount();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        long actualItemsAmount = cartTotal.getItemsAmount();
         assertEquals(6, actualItemsAmount);
     }
 
@@ -101,7 +98,9 @@ public class CartTotalCalculationTest {
         cartService.addPhone(2L, 2L);
         cartService.addPhone(3L, 1L);
 
-        long actualPrice = cartService.getOverallPrice();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        long actualPrice = cartTotal.getOverallPrice().longValue();
         long expected = 85;
         assertEquals(expected, actualPrice);
     }
@@ -111,7 +110,9 @@ public class CartTotalCalculationTest {
         cartService.addPhone(1L, 3L);
         cartService.addPhone(2L, 4L);
 
-        long actualPrice = cartService.getOverallPrice();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        long actualPrice = cartTotal.getOverallPrice().longValue();
         long expected = 110;
         assertEquals(expected, actualPrice);
     }
@@ -122,7 +123,9 @@ public class CartTotalCalculationTest {
         cartService.addPhone(2L, 5L);
         cartService.addPhone(3L, 4L);
 
-        long actualPrice = cartService.getOverallPrice();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        long actualPrice = cartTotal.getOverallPrice().longValue();
         long expected = 170;
         assertEquals(expected, actualPrice);
     }
@@ -135,7 +138,9 @@ public class CartTotalCalculationTest {
         cartService.addPhone(4L, 5L);
 
         long expected = 17;
-        long actual = cartService.getItemsAmount();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        long actual = cartTotal.getItemsAmount();
 
         assertEquals(expected,actual);
     }
@@ -148,7 +153,9 @@ public class CartTotalCalculationTest {
         cartService.addPhone(4L, 5L);
 
         long expected = 310;
-        long actual = cartService.getOverallPrice();
+        Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
+        long actual = cartTotal.getOverallPrice().longValue();
 
         assertEquals(expected,actual);
     }
