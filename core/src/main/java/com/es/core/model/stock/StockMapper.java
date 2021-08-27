@@ -1,6 +1,5 @@
 package com.es.core.model.stock;
 
-import com.es.core.model.stock.Stock;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

@@ -13,6 +13,7 @@ public interface CartService {
     void update(List<CartItem> items) throws OutOfStockException;
     void updateStocks(Map<Long,Long> items);
     void remove(Long phoneId);
+    void cleanCart();
     boolean isEnoughStock(Long phoneId, Long quantity, int stockAmount);
     CartTotal getCartTotal(Map<Long,Long> itemsCopy);
     Map<Phone, Long> getPhoneMap(Map<Long,Long> itemsCopy);
