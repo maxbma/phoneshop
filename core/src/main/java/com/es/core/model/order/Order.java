@@ -21,14 +21,14 @@ public class Order
     private String lastName;
     private String deliveryAddress;
     private String contactPhoneNo;
-    private String additioanlInfo;
+    private String additionalInfo;
 
-    public String getAdditioanlInfo() {
-        return additioanlInfo;
+    public String getAdditionalInfo() {
+        return additionalInfo;
     }
 
-    public void setAdditioanlInfo(String additioanlInfo) {
-        this.additioanlInfo = additioanlInfo;
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     private OrderStatus status;

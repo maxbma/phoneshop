@@ -3,6 +3,7 @@ package com.es.core.model.order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -10,9 +11,11 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class JdbcOrderDao implements OrderDao{
-    private final static String INSERT_ORDER = "insert into orders(id,subtotal,deliveryPrice,totalPrice,firstName,lastName,deliveryAddress,contactPhoneNo,statusId) values (?,?,?,?,?,?,?,?,?)";
+    private final static String INSERT_ORDER = "insert into orders(subtotal,deliveryPrice,totalPrice,firstName,lastName,deliveryAddress,contactPhoneNo,statusId) values (?,?,?,?,?,?,?,?)";
     private final static String INSERT_INTO_PHONE2ORDER = "insert into phone2order(phoneId,orderId) values(?,?)";
+    private final static String SELECT_TEST_ORDER = "select * from orders where id = ?";
 
     @Resource
     private JdbcTemplate jdbcTemplate;
@@ -31,10 +34,11 @@ public class JdbcOrderDao implements OrderDao{
     public void insertOrder(Order order) {
         Long orderId = (jdbcInsert.executeAndReturnKey(new BeanPropertySqlParameterSource(order))).longValue();
         order.setId(orderId);
-        Object[] args = new Object[]{orderId,order.getSubtotal(),order.getDeliveryPrice(),order.getTotalPrice(),
+        Object[] args = new Object[]{order.getSubtotal(),order.getDeliveryPrice(),order.getTotalPrice(),
                 order.getFirstName(),order.getLastName(),order.getDeliveryAddress(),order.getContactPhoneNo(),
                 (order.getStatus().ordinal()+1)};
         jdbcTemplate.update(INSERT_ORDER, args);
+        Order orderTest = jdbcTemplate.queryForObject(SELECT_TEST_ORDER, new Object[]{orderId}, Order.class);
         insertIntoPhone2Order(order);
     }
 
