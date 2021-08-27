@@ -5,6 +5,7 @@ import com.es.core.cart.CartTotal;
 import com.es.core.cart.HttpSessionCartService;
 import com.es.core.model.phone.JdbcPhoneDao;
 import com.es.core.model.phone.Phone;
+import com.es.core.model.stock.JdbcStockDao;
 import com.es.core.order.OutOfStockException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,8 +23,9 @@ import static org.mockito.Mockito.when;
 public class CartTotalCalculationTest {
 
     private static JdbcPhoneDao phoneDao = mock(JdbcPhoneDao.class);
+    private static JdbcStockDao stockDao = mock(JdbcStockDao.class);
 
-    private CartService cartService = new HttpSessionCartService(phoneDao);
+    private CartService cartService = new HttpSessionCartService(phoneDao, stockDao);
 
 
     @BeforeClass
@@ -73,11 +75,11 @@ public class CartTotalCalculationTest {
                         setId(4L);
                     }});
                 }});
-        when(phoneDao.getPhoneStockAmount(1L)).thenReturn(4);
-        when(phoneDao.getPhoneStockAmount(2L)).thenReturn(5);
-        when(phoneDao.getPhoneStockAmount(3L)).thenReturn(7);
-        when(phoneDao.getPhoneStockAmount(4L)).thenReturn(5);
-        when(phoneDao.getPhoneStockAmount(5L)).thenReturn(0);
+        when(stockDao.getPhoneStockAmount(1L)).thenReturn(4);
+        when(stockDao.getPhoneStockAmount(2L)).thenReturn(5);
+        when(stockDao.getPhoneStockAmount(3L)).thenReturn(7);
+        when(stockDao.getPhoneStockAmount(4L)).thenReturn(5);
+        when(stockDao.getPhoneStockAmount(5L)).thenReturn(0);
     }
 
     @Test

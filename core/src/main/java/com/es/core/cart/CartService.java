@@ -11,6 +11,7 @@ public interface CartService {
     Cart getCart();
     void addPhone(Long phoneId, Long quantity) throws OutOfStockException;
     void update(List<CartItem> items) throws OutOfStockException;
+    void updateStocks(Map<Long,Long> items);
     void remove(Long phoneId);
     boolean isEnoughStock(Long phoneId, Long quantity, int stockAmount);
     CartTotal getCartTotal(Map<Long,Long> itemsCopy);

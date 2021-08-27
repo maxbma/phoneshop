@@ -2,7 +2,8 @@ package com.es.core.cart;
 
 import com.es.core.model.phone.JdbcPhoneDao;
 import com.es.core.model.phone.Phone;
-import com.es.core.model.phone.Stock;
+import com.es.core.model.stock.JdbcStockDao;
+import com.es.core.model.stock.Stock;
 import com.es.core.order.OutOfStockException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -23,6 +24,9 @@ public class HttpSessionCartService implements CartService {
     @Resource
     private JdbcPhoneDao phoneDao;
 
+    @Resource
+    private JdbcStockDao stockDao;
+
     private final Cart cart = new Cart();
 
     @Override
@@ -31,13 +35,14 @@ public class HttpSessionCartService implements CartService {
     }
 
     public HttpSessionCartService(){}
-    public HttpSessionCartService(JdbcPhoneDao phoneDao){
+    public HttpSessionCartService(JdbcPhoneDao phoneDao, JdbcStockDao stockDao){
         this.phoneDao = phoneDao;
+        this.stockDao = stockDao;
     }
 
     @Override
     public void addPhone(Long phoneId, Long quantity) throws OutOfStockException {
-        int stockAmount = phoneDao.getPhoneStockAmount(phoneId);
+        int stockAmount = stockDao.getPhoneStockAmount(phoneId);
         lock.lock();
         try{
             if(!isEnoughStock(phoneId, quantity, stockAmount)) throw new OutOfStockException("Out of stock");
@@ -58,7 +63,7 @@ public class HttpSessionCartService implements CartService {
         for(CartItem item : items){
             idList.add(item.getPhoneId());
         }
-        List<Stock> stocks = phoneDao.getStockList(idList);
+        List<Stock> stocks = stockDao.getStockList(idList);
         Map<Long, Stock> stockMap = new HashMap<>(stocks.size());
         stocks.forEach(stock -> stockMap.put(stock.getPhoneId(), stock));
         lock.lock();
@@ -81,6 +86,18 @@ public class HttpSessionCartService implements CartService {
             }
             if(itemNumbersWithException.size() != 0) throw new OutOfStockException(itemNumbersWithException, "Out of stock");
             prevCart.putAll(toPut);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void updateStocks(Map<Long,Long> items) {
+        List<Stock> stocks = stockDao.getStockList(new ArrayList<>(items.keySet()));
+        lock.lock();
+        try{
+            stocks.forEach(stock -> stock.setReserved(stock.getReserved() + items.get(stock.getPhoneId()).intValue()));
+            stockDao.updateStocks(stocks);
         } finally {
             lock.unlock();
         }
