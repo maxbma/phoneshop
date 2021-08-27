@@ -38,7 +38,6 @@ public class JdbcOrderDao implements OrderDao{
                 order.getFirstName(),order.getLastName(),order.getDeliveryAddress(),order.getContactPhoneNo(),
                 (order.getStatus().ordinal()+1)};
         jdbcTemplate.update(INSERT_ORDER, args);
-        Order orderTest = jdbcTemplate.queryForObject(SELECT_TEST_ORDER, new Object[]{orderId}, Order.class);
         insertIntoPhone2Order(order);
     }
 
