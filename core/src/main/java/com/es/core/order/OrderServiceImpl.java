@@ -1,9 +1,9 @@
 package com.es.core.order;
 
 import com.es.core.model.order.Order;
+import com.es.core.model.order.OrderDao;
 import com.es.core.model.order.OrderItem;
 import com.es.core.model.phone.Phone;
-import com.es.core.model.phone.PhoneDao;
 import com.es.core.model.stock.Stock;
 import com.es.core.model.stock.StockDao;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,16 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-//@PropertySource("classpath:application.properties")
 public class OrderServiceImpl implements OrderService {
 
     @Value("${delivery.price}")
     private Long deliveryPrice;
-
-    @Resource
-    private PhoneDao phoneDao;
     @Resource
     private StockDao stockDao;
+    @Resource
+    private OrderDao orderDao;
 
     @Override
     public void validateStocks(Map<Long, Long> items) throws OutOfStockException {
@@ -60,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void placeOrder(Order order){
+        orderDao.insertOrder(order);
 
     }
 

@@ -1,6 +1,5 @@
 package com.es.phoneshop.web.controller.pages;
 
-import com.es.core.cart.CartItem;
 import com.es.core.cart.CartService;
 import com.es.core.cart.CartTotal;
 import com.es.core.model.order.Order;
@@ -20,13 +19,14 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/order")
@@ -90,6 +90,7 @@ public class OrderPageController {
             order.setStatus(OrderStatus.NEW);
             cartService.updateStocks(cartItemsCopy);
             orderService.placeOrder(order);
+            cartService.cleanCart();
             redirectAttributes.addFlashAttribute("order", order);
             return "redirect:/orderOverview";
         }
@@ -100,7 +101,7 @@ public class OrderPageController {
         order.setLastName(form.getLastName());
         order.setDeliveryAddress(form.getAddress());
         order.setContactPhoneNo(form.getPhoneNumber());
-        order.setAdditioanlInfo(form.getAdditionalInfo());
+        order.setAdditionalInfo(form.getAdditionalInfo());
     }
 
     private void setOrderPrices(CartTotal cartTotal, Order order){

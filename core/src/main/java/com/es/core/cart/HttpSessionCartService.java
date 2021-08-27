@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -108,6 +111,16 @@ public class HttpSessionCartService implements CartService {
         lock.lock();
         try{
             cart.getItems().remove(phoneId);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void cleanCart() {
+        lock.lock();
+        try{
+            cart.getItems().clear();
         } finally {
             lock.unlock();
         }
