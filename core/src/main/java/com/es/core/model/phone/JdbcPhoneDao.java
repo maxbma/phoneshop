@@ -1,5 +1,6 @@
 package com.es.core.model.phone;
 
+import com.es.core.model.stock.StockMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -20,9 +21,7 @@ public class JdbcPhoneDao implements PhoneDao{
     private static final String SELECT_PHONES_AMOUNT = "select count(*) from phones join stocks on phones.id = stocks.phoneId where stocks.stock > 0 and price is not null";
     private static final String SELECT_SEARCHED_PHONES = "select * from phones join stocks on phones.id=stocks.phoneId left join phone2color on phones.id = phone2color.phoneId left join colors on phone2color.colorId = colors.id where stocks.stock > 0 and price is not null and upper(phones.model) like upper(?) order by %s offset ? limit ?";
     private static final String SELECT_SEARCHED_PHONES_AMOUNT = "select count(*) from phones join stocks on phones.id = stocks.phoneId where stocks.stock > 0 and price is not null and upper(phones.model) like upper(?)";
-    private static final String SELECT_PHONE_STOCK = "select stock - reserved from stocks where phoneId = ?";
     private static final String SELECT_PHONES_BY_ID_LIST = "select * from phones left join phone2color on phones.id = phone2color.phoneId left join colors on phone2color.colorId = colors.id where phones.id in(%s)";
-    private static final String SELECT_STOCK_LIST = "select stock, reserved, phoneId from stocks where phoneId in (%s)";
 
     private final PhoneExtractor phoneExtractor = new PhoneExtractor();
     private final StockMapper stockMapper = new StockMapper();
@@ -105,22 +104,6 @@ public class JdbcPhoneDao implements PhoneDao{
         }
     }
 
-    @Override
-    public List<Stock> getStockList(List<Long> idList) {
-        if(idList.isEmpty()){
-            return Collections.emptyList();
-        } else{
-            StringBuffer sb = new StringBuffer();
-            Iterator<Long> iterator = idList.listIterator();
-            while(iterator.hasNext()){
-                sb.append(iterator.next());
-                if(iterator.hasNext()) sb.append(",");
-            }
-            String sql = String.format(SELECT_STOCK_LIST, sb);
-            return jdbcTemplate.query(sql, stockMapper);
-        }
-    }
-
     public List<Phone> findSearchedPhones(String search, String order, int offset, int limit){
         if(offset < 0 ) throw new IllegalArgumentException();
         if(limit < 0) throw new IllegalArgumentException();
@@ -132,11 +115,6 @@ public class JdbcPhoneDao implements PhoneDao{
     @Override
     public int getPhonesAmount() {
         return jdbcTemplate.queryForObject(SELECT_PHONES_AMOUNT,Integer.class);
-    }
-
-    @Override
-    public int getPhoneStockAmount(Long phoneId){
-        return jdbcTemplate.queryForObject(SELECT_PHONE_STOCK, new Object[]{phoneId}, Integer.class);
     }
 
     @Override
