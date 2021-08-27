@@ -43,12 +43,12 @@ public class ProductListPageController {
         totalPages = pageService.getPagesAmount(search);
         if(page < 1 || page > totalPages) return "redirect:/error";
         int offset = (page-1)*PAGE_LIMIT;
-        if(search == null){
+        if(search == null || search.isEmpty()){
             phones = phoneDao.findAll(order, offset, PAGE_LIMIT);
         } else {
             phones = phoneDao.findSearchedPhones(search, order, offset, PAGE_LIMIT);
         }
-        if(search!=null) model.addAttribute("search", search);
+        if(search!=null && !search.isEmpty()) model.addAttribute("search", search);
         model.addAttribute("phones", phones);
         model.addAttribute("order", order);
         model.addAttribute("total", totalPages);

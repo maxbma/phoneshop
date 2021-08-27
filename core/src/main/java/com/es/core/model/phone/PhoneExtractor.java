@@ -7,10 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PhoneExtractor implements ResultSetExtractor<List<Phone>> {
 
@@ -19,7 +16,7 @@ public class PhoneExtractor implements ResultSetExtractor<List<Phone>> {
 
     @Override
     public List<Phone> extractData(ResultSet rs) throws SQLException, DataAccessException {
-        Map<Long, Phone> phoneMap = new HashMap<>();
+        Map<Long, Phone> phoneMap = new LinkedHashMap<>();
         while(rs.next()){
             long id = rs.getLong("id");
             Phone phone = phoneMap.get(id);
