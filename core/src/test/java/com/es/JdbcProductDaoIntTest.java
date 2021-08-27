@@ -3,6 +3,7 @@ package com.es;
 import com.es.core.model.phone.Color;
 import com.es.core.model.phone.JdbcPhoneDao;
 import com.es.core.model.phone.Phone;
+import com.es.core.model.stock.JdbcStockDao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ public class JdbcProductDaoIntTest {
 
     @Autowired
     private JdbcPhoneDao phoneDao;
+    @Autowired
+    private JdbcStockDao stockDao;
 
     @Test
     public void testPhonesAmount(){
@@ -62,7 +65,7 @@ public class JdbcProductDaoIntTest {
     @Test
     public void testPhoneStockAmount(){
         int expected = 11;
-        int actual = phoneDao.getPhoneStockAmount(1002L);
+        int actual = stockDao.getPhoneStockAmount(1002L);
         assertEquals(actual,expected);
 
     }

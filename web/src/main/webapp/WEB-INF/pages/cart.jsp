@@ -24,6 +24,12 @@
         <th>Action</th>
     </tr>
     </thead>
+    <c:if test="${orderErrorMsg != null}">
+        <script>
+            var msg = "${orderErrorMsg}";
+            alert(msg);
+        </script>
+    </c:if>
     <form:form action="${contextUrl}cart/update" modelAttribute="cartUpdateForm">
     <input type="hidden" id="meth" name="_method">
     <c:forEach var="phoneEntry" items="${phoneEntrySet}" varStatus="loop">
