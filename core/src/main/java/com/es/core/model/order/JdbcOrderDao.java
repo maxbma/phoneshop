@@ -13,9 +13,9 @@ import java.util.List;
 
 @Component
 public class JdbcOrderDao implements OrderDao{
-    private final static String INSERT_ORDER = "insert into orders(subtotal,deliveryPrice,totalPrice,firstName,lastName,deliveryAddress,contactPhoneNo,statusId) values (?,?,?,?,?,?,?,?)";
-    private final static String INSERT_INTO_PHONE2ORDER = "insert into phone2order(phoneId,orderId) values(?,?)";
-    private final static String SELECT_TEST_ORDER = "select * from orders where id = ?";
+    private final static String INSERT_ORDER_STATUS = "update orders set statusId = ? where id = ?";
+    private final static String INSERT_INTO_PHONE2ORDER = "insert into phone2order(phoneId,orderId,quantity) values(?,?,?)";
+    private final static String SELECT_ALL_ORDERS = "select * from orders";
 
     @Resource
     private JdbcTemplate jdbcTemplate;
@@ -34,10 +34,8 @@ public class JdbcOrderDao implements OrderDao{
     public void insertOrder(Order order) {
         Long orderId = (jdbcInsert.executeAndReturnKey(new BeanPropertySqlParameterSource(order))).longValue();
         order.setId(orderId);
-        Object[] args = new Object[]{order.getSubtotal(),order.getDeliveryPrice(),order.getTotalPrice(),
-                order.getFirstName(),order.getLastName(),order.getDeliveryAddress(),order.getContactPhoneNo(),
-                (order.getStatus().ordinal()+1)};
-        jdbcTemplate.update(INSERT_ORDER, args);
+        Object[] args = new Object[]{(order.getStatus().ordinal()+1), orderId};
+        jdbcTemplate.update(INSERT_ORDER_STATUS, args);
         insertIntoPhone2Order(order);
     }
 
