@@ -23,6 +23,7 @@ public class Order
     private String contactPhoneNo;
     private String additionalInfo;
 
+    private OrderStatus status;
     public String getAdditionalInfo() {
         return additionalInfo;
     }
@@ -30,8 +31,6 @@ public class Order
     public void setAdditionalInfo(String additionalInfo) {
         this.additionalInfo = additionalInfo;
     }
-
-    private OrderStatus status;
 
     public Long getId() {
         return id;

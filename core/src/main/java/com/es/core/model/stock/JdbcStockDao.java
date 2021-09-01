@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 public class JdbcStockDao implements StockDao{
-    private static final String UPDATE_PHONE2ORDER = "update stocks set reserved = ? where phoneId = ?";
+    private static final String UPDATE_PHONE_STOCK = "update stocks set reserved = reserved + ? where phoneId = ?";
     private static final String SELECT_STOCK_LIST = "select stock, reserved, phoneId from stocks where phoneId in (%s)";
     private static final String SELECT_PHONE_STOCK = "select stock - reserved from stocks where phoneId = ?";
 
@@ -28,7 +28,7 @@ public class JdbcStockDao implements StockDao{
         for (Stock stock : stocks){
             batchArgs.add(new Object[]{stock.getReserved(), stock.getPhoneId()});
         }
-        jdbcTemplate.batchUpdate(UPDATE_PHONE2ORDER, batchArgs);
+        jdbcTemplate.batchUpdate(UPDATE_PHONE_STOCK, batchArgs);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class JdbcStockDao implements StockDao{
         if(idList.isEmpty()){
             return Collections.emptyList();
         } else{
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             Iterator<Long> iterator = idList.listIterator();
             while(iterator.hasNext()){
                 sb.append(iterator.next());

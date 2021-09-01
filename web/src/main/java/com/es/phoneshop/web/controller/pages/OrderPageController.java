@@ -22,15 +22,21 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Controller
 @RequestMapping(value = "/order")
 public class OrderPageController {
+
+    private final Map<String,Order> sessionOrderMap = new HashMap<>();
+
     @Resource
     private OrderService orderService;
 
@@ -47,8 +53,12 @@ public class OrderPageController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public String getOrder(Model model){
+    public String getOrder(Model model, RedirectAttributes redirectAttributes){
         Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+        if(cartItemsCopy.isEmpty()){
+            redirectAttributes.addFlashAttribute("orderErrorMsg", "Cart is empty");
+            return "redirect:/cart";
+        }
         Set<Map.Entry<Phone, Long>> phoneSet = cartService.getPhoneMap(cartItemsCopy).entrySet();
         CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
         BigDecimal overallPrice = cartTotal.getOverallPrice();
@@ -67,13 +77,17 @@ public class OrderPageController {
 
     @RequestMapping(method = RequestMethod.POST)
     public String placeOrder(@ModelAttribute("orderInformationForm") @Valid OrderInformationForm orderInfo,
-                           BindingResult result, Model model, RedirectAttributes redirectAttributes) throws OutOfStockException {
+                             BindingResult result, HttpServletRequest request, RedirectAttributes redirectAttributes) throws OutOfStockException {
         if(result.hasErrors()){
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.orderInformationForm", result);
             redirectAttributes.addFlashAttribute("orderInformationForm", orderInfo);
             return "redirect:/order";
         } else {
             Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
+            if(cartItemsCopy.isEmpty()){
+                redirectAttributes.addFlashAttribute("orderErrorMsg", "Cart is empty");
+                return "redirect:/cart";
+            }
             Map<Phone, Long> phoneMap = cartService.getPhoneMap(cartItemsCopy);
             try {
                 orderService.validateStocks(cartItemsCopy);
@@ -84,15 +98,32 @@ public class OrderPageController {
                 redirectAttributes.addFlashAttribute("orderErrorMsg", "Some products from your order were out of stock and deleted from your cart");
                 return "redirect:/cart";
             }
+
             Order order = orderService.createOrder(phoneMap);
             setOrderInformation(orderInfo, order);
             setOrderPrices(cartService.getCartTotal(cartItemsCopy), order);
             order.setStatus(OrderStatus.NEW);
-            cartService.updateStocks(cartItemsCopy);
-            orderService.placeOrder(order);
-            cartService.cleanCart();
-            redirectAttributes.addFlashAttribute("order", order);
-            return "redirect:/orderOverview";
+
+            try{
+                orderService.placeOrder(order, cartItemsCopy);
+            } catch (ConstraintViolationException constraintException){
+                try{
+                    orderService.validateStocks(cartItemsCopy);
+                } catch (OutOfStockException e){
+                    for (long phoneId : e.getPhoneIdList()){
+                        cartService.remove(phoneId);
+                    }
+                    redirectAttributes.addFlashAttribute("orderErrorMsg", "Some products from your order were out of stock and deleted from your cart");
+                    return "redirect:/cart";
+                }
+            }
+            cartService.cleanCart(cartItemsCopy);
+
+            String id = UUID.randomUUID().toString();
+            sessionOrderMap.put(id,order);
+            request.getSession().setAttribute("sessionOrderMap", sessionOrderMap);
+
+            return "redirect:/orderOverview/"+id;
         }
     }
 
