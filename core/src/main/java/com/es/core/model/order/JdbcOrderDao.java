@@ -15,7 +15,6 @@ import java.util.List;
 public class JdbcOrderDao implements OrderDao{
     private final static String INSERT_ORDER_STATUS = "update orders set statusId = ? where id = ?";
     private final static String INSERT_INTO_PHONE2ORDER = "insert into phone2order(phoneId,orderId,quantity,price) values(?,?,?,?)";
-    private final static String SELECT_ALL_ORDERS = "select * from orders";
 
     @Resource
     private JdbcTemplate jdbcTemplate;
