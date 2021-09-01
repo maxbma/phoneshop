@@ -9,5 +9,5 @@ public interface OrderService {
     void validateStocks(Map<Long,Long> items) throws OutOfStockException;
     Order createOrder(Map<Phone,Long> phoneMap);
     Long getDeliveryPrice();
-    void placeOrder(Order order) throws OutOfStockException;
+    void placeOrder(Order order, Map<Long,Long> items);
 }

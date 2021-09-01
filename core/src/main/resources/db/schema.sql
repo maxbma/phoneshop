@@ -54,7 +54,9 @@ create table stocks (
   stock SMALLINT NOT NULL,
   reserved SMALLINT NOT NULL,
   UNIQUE (phoneId),
-  CONSTRAINT FK_stocks_phoneId FOREIGN KEY (phoneId) REFERENCES phones (id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT FK_stocks_phoneId FOREIGN KEY (phoneId) REFERENCES phones (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT CHK_stock CHECK (stock >= 0),
+  CONSTRAINT CHK_stock_minus_reserved CHECK (reserved <= stock)
 );
 
 create table statuses(
@@ -66,7 +68,7 @@ create table orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     subtotal FLOAT NOT NULL,
     deliveryPrice FLOAT NOT NULL,
-    totalPrice FLOAT NOT NULL,
+    totalPrice DECIMAL(6,2) NOT NULL,
     firstName VARCHAR(20) NOT NULL,
     lastName VARCHAR(25) NOT NULL,
     deliveryAddress VARCHAR(50) NOT NULL,
@@ -78,6 +80,8 @@ create table orders (
 create table phone2order(
     phoneId BIGINT,
     orderId BIGINT,
+    quantity BIGINT,
+    price DECIMAL (6,2),
     CONSTRAINT FK_phone2order_phoneId FOREIGN KEY (phoneId) REFERENCES phones (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FK_phone2order_orderId FOREIGN KEY (orderId) REFERENCES orders (id) ON DELETE CASCADE ON UPDATE CASCADE
 );

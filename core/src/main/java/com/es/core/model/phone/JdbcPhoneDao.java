@@ -93,7 +93,7 @@ public class JdbcPhoneDao implements PhoneDao{
         if(idList.isEmpty()){
             return Collections.emptyList();
         } else{
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             Iterator<Long> iterator = idList.listIterator();
             while(iterator.hasNext()){
                 sb.append(iterator.next());

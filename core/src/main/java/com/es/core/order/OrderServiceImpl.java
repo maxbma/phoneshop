@@ -1,5 +1,6 @@
 package com.es.core.order;
 
+import com.es.core.cart.CartService;
 import com.es.core.model.order.Order;
 import com.es.core.model.order.OrderDao;
 import com.es.core.model.order.OrderItem;
@@ -8,6 +9,7 @@ import com.es.core.model.stock.Stock;
 import com.es.core.model.stock.StockDao;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -24,6 +26,8 @@ public class OrderServiceImpl implements OrderService {
     private StockDao stockDao;
     @Resource
     private OrderDao orderDao;
+    @Resource
+    private CartService cartService;
 
     @Override
     public void validateStocks(Map<Long, Long> items) throws OutOfStockException {
@@ -57,9 +61,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void placeOrder(Order order){
-        orderDao.insertOrder(order);
 
+    @Override
+    @Transactional
+    public void placeOrder(Order order, Map<Long,Long> items){
+        cartService.updateStocks(items);
+        orderDao.insertOrder(order);
     }
 
     public Long getDeliveryPrice() {

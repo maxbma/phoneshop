@@ -97,13 +97,7 @@ public class HttpSessionCartService implements CartService {
     @Override
     public void updateStocks(Map<Long,Long> items) {
         List<Stock> stocks = stockDao.getStockList(new ArrayList<>(items.keySet()));
-        lock.lock();
-        try{
-            stocks.forEach(stock -> stock.setReserved(stock.getReserved() + items.get(stock.getPhoneId()).intValue()));
-            stockDao.updateStocks(stocks);
-        } finally {
-            lock.unlock();
-        }
+        stockDao.updateStocks(stocks);
     }
 
     @Override
@@ -117,10 +111,17 @@ public class HttpSessionCartService implements CartService {
     }
 
     @Override
-    public void cleanCart() {
+    public void cleanCart(Map<Long,Long> items) {
         lock.lock();
         try{
-            cart.getItems().clear();
+            for(Map.Entry<Long,Long> entry : items.entrySet()){
+                long left = cart.getItems().get(entry.getKey()) - entry.getValue();
+                if(left <= 0){
+                    cart.getItems().remove(entry.getKey());
+                } else{
+                    cart.getItems().replace(entry.getKey(), left);
+                }
+            }
         } finally {
             lock.unlock();
         }
