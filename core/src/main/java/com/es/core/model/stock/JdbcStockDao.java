@@ -5,10 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class JdbcStockDao implements StockDao{
@@ -23,10 +20,10 @@ public class JdbcStockDao implements StockDao{
 
     @Override
     @Transactional
-    public void updateStocks(List<Stock> stocks) {
+    public void updateStocks(Map<Long,Long> items) {
         List<Object[]> batchArgs = new ArrayList<>();
-        for (Stock stock : stocks){
-            batchArgs.add(new Object[]{stock.getReserved(), stock.getPhoneId()});
+        for(Map.Entry<Long,Long> entry : items.entrySet()){
+            batchArgs.add(new Object[]{entry.getValue(), entry.getKey()});
         }
         jdbcTemplate.batchUpdate(UPDATE_PHONE_STOCK, batchArgs);
     }

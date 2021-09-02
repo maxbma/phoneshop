@@ -96,8 +96,7 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public void updateStocks(Map<Long,Long> items) {
-        List<Stock> stocks = stockDao.getStockList(new ArrayList<>(items.keySet()));
-        stockDao.updateStocks(stocks);
+        stockDao.updateStocks(items);
     }
 
     @Override
