@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -22,8 +23,14 @@ public class OrderOverviewPageController {
     private CartService cartService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public String getOrderOverview(@PathVariable("id") String orderId, Model model, HttpServletRequest request){
-        model.addAttribute("order", ((Map<String, Order>)request.getSession().getAttribute("sessionOrderMap")).get(orderId));
+    public String getOrderOverview(@PathVariable("id") String orderId, Model model,
+                                   HttpServletRequest request, RedirectAttributes redirectAttributes){
+        Order order = ((Map<String, Order>)request.getSession().getAttribute("sessionOrderMap")).get(orderId);
+        if(order == null) {
+            redirectAttributes.addFlashAttribute("orderErrorMsg", "Order not found");
+            return "redirect:/cart";
+        }
+        model.addAttribute("order", order);
         Map<Long,Long> cartItemsCopy = new HashMap<>(cartService.getCart().getItems());
         CartTotal cartTotal = cartService.getCartTotal(cartItemsCopy);
         model.addAttribute("itemsAmount", cartTotal.getItemsAmount());

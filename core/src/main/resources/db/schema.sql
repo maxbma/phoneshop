@@ -60,7 +60,7 @@ create table stocks (
 );
 
 create table statuses(
-    id SMALLINT AUTO_INCREMENT PRIMARY KEY,
+    id SMALLINT PRIMARY KEY,
     code VARCHAR(15) NOT NULL
 );
 
@@ -74,6 +74,7 @@ create table orders (
     deliveryAddress VARCHAR(50) NOT NULL,
     contactPhoneNo VARCHAR(15) NOT NULL,
     statusId SMALLINT,
+    additionalInfo VARCHAR(300),
     CONSTRAINT FK_orders_statusId FOREIGN KEY (statusId) REFERENCES statuses (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
