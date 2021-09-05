@@ -23,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -30,12 +31,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @RequestMapping(value = "/order")
 public class OrderPageController {
-
-    private final Map<String,Order> sessionOrderMap = new HashMap<>();
 
     @Resource
     private OrderService orderService;
@@ -116,12 +116,22 @@ public class OrderPageController {
                     redirectAttributes.addFlashAttribute("orderErrorMsg", "Some products from your order were out of stock and deleted from your cart");
                     return "redirect:/cart";
                 }
+                redirectAttributes.addFlashAttribute("error", "Unknown error");
+                return "redirect:/error";
             }
             cartService.cleanCart(cartItemsCopy);
 
             String id = UUID.randomUUID().toString();
+
+            HttpSession session = request.getSession();
+            Map<String,Order> sessionOrderMap;
+            if(session.getAttribute("sessionOrderMap") == null){
+                sessionOrderMap = new ConcurrentHashMap<>();
+            } else{
+                sessionOrderMap = (Map<String, Order>) session.getAttribute("sessionOrderMap");
+            }
             sessionOrderMap.put(id,order);
-            request.getSession().setAttribute("sessionOrderMap", sessionOrderMap);
+            session.setAttribute("sessionOrderMap", sessionOrderMap);
 
             return "redirect:/orderOverview/"+id;
         }
