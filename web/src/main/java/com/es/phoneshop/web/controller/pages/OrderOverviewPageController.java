@@ -25,7 +25,12 @@ public class OrderOverviewPageController {
     @RequestMapping(method = RequestMethod.GET)
     public String getOrderOverview(@PathVariable("id") String orderId, Model model,
                                    HttpServletRequest request, RedirectAttributes redirectAttributes){
-        Order order = ((Map<String, Order>)request.getSession().getAttribute("sessionOrderMap")).get(orderId);
+        Object mapObject = request.getSession().getAttribute("sessionOrderMap");
+        if(mapObject == null){
+            redirectAttributes.addFlashAttribute("error", "Unknown error");
+            return "redirect:/error";
+        }
+        Order order = ((Map<String, Order>)mapObject).get(orderId);
         if(order == null) {
             redirectAttributes.addFlashAttribute("orderErrorMsg", "Order not found");
             return "redirect:/cart";

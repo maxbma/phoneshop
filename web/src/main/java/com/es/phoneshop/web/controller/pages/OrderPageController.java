@@ -125,13 +125,14 @@ public class OrderPageController {
 
             HttpSession session = request.getSession();
             Map<String,Order> sessionOrderMap;
-            if(session.getAttribute("sessionOrderMap") == null){
+            Object mapObject = session.getAttribute("sessionOrderMap");
+            if(mapObject == null){
                 sessionOrderMap = new ConcurrentHashMap<>();
+                session.setAttribute("sessionOrderMap", sessionOrderMap);
             } else{
-                sessionOrderMap = (Map<String, Order>) session.getAttribute("sessionOrderMap");
+                sessionOrderMap = (Map<String, Order>) mapObject;
             }
             sessionOrderMap.put(id,order);
-            session.setAttribute("sessionOrderMap", sessionOrderMap);
 
             return "redirect:/orderOverview/"+id;
         }
