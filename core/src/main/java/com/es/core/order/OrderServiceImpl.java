@@ -61,8 +61,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-
-    @Override
     @Transactional
     public void placeOrder(Order order, Map<Long,Long> items){
         cartService.updateStocks(items);
