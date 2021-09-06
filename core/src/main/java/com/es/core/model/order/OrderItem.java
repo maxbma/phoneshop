@@ -6,6 +6,19 @@ public class OrderItem {
     private Phone phone;
     private Long quantity;
 
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj) return true;
+        if(obj == null || obj.getClass() != this.getClass()) return false;
+        OrderItem item = (OrderItem)obj;
+        return phone.equals(item.phone) && quantity.equals(item.quantity);
+    }
+
+    @Override
+    public int hashCode(){
+        return phone.hashCode() + quantity.hashCode();
+    }
+
     public Phone getPhone() {
         return phone;
     }
