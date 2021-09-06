@@ -75,6 +75,7 @@ create table orders (
     contactPhoneNo VARCHAR(15) NOT NULL,
     statusId SMALLINT,
     additionalInfo VARCHAR(300),
+    orderDate TIMESTAMP,
     CONSTRAINT FK_orders_statusId FOREIGN KEY (statusId) REFERENCES statuses (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 

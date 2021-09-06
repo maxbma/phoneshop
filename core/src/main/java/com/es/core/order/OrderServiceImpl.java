@@ -67,6 +67,19 @@ public class OrderServiceImpl implements OrderService {
         orderDao.insertOrder(order);
     }
 
+    @Override
+    public Order getOrderById(long id) {
+        Order order = orderDao.getOrderById(id);
+        if(order == null) return null;
+        order.setOrderItems(orderDao.getOrderItemsById(id));
+        return order;
+    }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderDao.getAllOrders();
+    }
+
     public Long getDeliveryPrice() {
         return deliveryPrice;
     }

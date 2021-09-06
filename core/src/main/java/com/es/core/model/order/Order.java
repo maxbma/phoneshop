@@ -1,6 +1,7 @@
 package com.es.core.model.order;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class Order
@@ -24,6 +25,17 @@ public class Order
     private String additionalInfo;
 
     private OrderStatus status;
+
+    private Timestamp date;
+
+    public Timestamp getDate() {
+        return date;
+    }
+
+    public void setDate(Timestamp date) {
+        this.date = date;
+    }
+
     public String getAdditionalInfo() {
         return additionalInfo;
     }
