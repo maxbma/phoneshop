@@ -1,11 +1,13 @@
 package com.es.core.model.order;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class Order
-{
+public class Order implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Long id;
     private List<OrderItem> orderItems;
     /**
@@ -26,14 +28,14 @@ public class Order
 
     private OrderStatus status;
 
-    private Timestamp date;
+    private LocalDateTime orderDate;
 
-    public Timestamp getDate() {
-        return date;
+    public LocalDateTime getOrderDate() {
+        return orderDate;
     }
 
-    public void setDate(Timestamp date) {
-        this.date = date;
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
     }
 
     public String getAdditionalInfo() {

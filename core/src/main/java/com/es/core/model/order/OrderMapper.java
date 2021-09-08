@@ -5,11 +5,20 @@ import org.springframework.jdbc.core.RowMapper;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OrderMapper implements RowMapper<Order> {
 
-    private final OrderStatus[] statusValues = OrderStatus.values();
+    private final static Map<Integer, OrderStatus> orderStatusMap = new HashMap<>();
+
+    static{
+        for(OrderStatus status : OrderStatus.values()){
+            orderStatusMap.put(status.getStatusId(), status);
+        }
+    }
+
     @Override
     public Order mapRow(ResultSet resultSet, int i) throws SQLException {
         long id = resultSet.getLong("id");
@@ -18,11 +27,11 @@ public class OrderMapper implements RowMapper<Order> {
         String contactPhoneNo = resultSet.getString("contactPhoneNo");
         String deliveryAddress = resultSet.getString("deliveryAddress");
         String additionalInfo = resultSet.getString("additionalInfo");
-        Timestamp date = resultSet.getTimestamp("orderDate");
+        LocalDateTime date = resultSet.getTimestamp("orderDate").toLocalDateTime();
         BigDecimal subtotal = resultSet.getBigDecimal("subtotal");
         BigDecimal deliveryPrice = resultSet.getBigDecimal("deliveryPrice");
         BigDecimal totalPrice = resultSet.getBigDecimal("totalPrice");
-        OrderStatus status = statusValues[resultSet.getInt("statusId") - 1];
+        OrderStatus status = orderStatusMap.get(resultSet.getInt("statusId"));
 
         Order order = new Order();
         order.setId(id);
@@ -31,7 +40,7 @@ public class OrderMapper implements RowMapper<Order> {
         order.setContactPhoneNo(contactPhoneNo);
         order.setDeliveryAddress(deliveryAddress);
         order.setAdditionalInfo(additionalInfo);
-        order.setDate(date);
+        order.setOrderDate(date);
         order.setSubtotal(subtotal);
         order.setDeliveryPrice(deliveryPrice);
         order.setTotalPrice(totalPrice);

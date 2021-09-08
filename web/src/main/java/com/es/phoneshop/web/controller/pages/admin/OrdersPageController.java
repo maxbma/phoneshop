@@ -2,6 +2,7 @@ package com.es.phoneshop.web.controller.pages.admin;
 
 import com.es.core.model.order.Order;
 import com.es.core.model.order.OrderDao;
+import com.es.core.model.order.OrderStatus;
 import com.es.core.order.OrderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,8 +44,25 @@ public class OrdersPageController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public String changeOrderStatus(@PathVariable("id") long orderId,
-                                @RequestParam("status") Integer statusId){
-        orderDao.changeStatus(orderId,statusId);
+                                @RequestParam("status") Integer statusId,
+                                    RedirectAttributes redirectAttributes){
+        if(!orderDao.exists(orderId)){
+            redirectAttributes.addFlashAttribute("errorChangingStatus", "Order not exists");
+            return "redirect:/admin/orders";
+        } else if(!orderDao.isCurrentStatusNew(orderId)){
+            redirectAttributes.addFlashAttribute("errorChangingStatus", "Order status must be NEW to update it");
+        } else if(!checkIfStatusIdExists(statusId)){
+            redirectAttributes.addFlashAttribute("errorChangingStatus", "Status ID not exists");
+        } else{
+            orderDao.changeStatus(orderId,statusId);
+        }
         return "redirect:/admin/orders/"+orderId;
+    }
+
+    private boolean checkIfStatusIdExists(Integer statusId){
+        for(OrderStatus status : OrderStatus.values()){
+            if(status.getStatusId() == statusId) return true;
+        }
+        return false;
     }
 }
