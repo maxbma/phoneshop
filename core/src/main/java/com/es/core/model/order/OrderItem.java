@@ -2,7 +2,11 @@ package com.es.core.model.order;
 
 import com.es.core.model.phone.Phone;
 
-public class OrderItem {
+import java.io.Serializable;
+
+public class OrderItem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Phone phone;
     private Long quantity;
 

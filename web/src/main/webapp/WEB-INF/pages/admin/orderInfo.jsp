@@ -7,6 +7,11 @@
     <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/style.css"/>">
 </head>
 <body>
+<c:if test="${errorChangingStatus != null}">
+    <script>
+        alert('${errorChangingStatus}');
+    </script>
+</c:if>
 <p style="font-size: large; font-weight: bold">Order number: ${order.id}</p>
 <b style="float: right">Status: ${order.status}</b>
 <table class="tbl">
@@ -82,7 +87,7 @@
 <a href="${contextUrl}admin/orders">
     <button>Back</button>
 </a>
-<c:if test="${order.status.ordinal() == 0}">
+<c:if test="${order.status.statusId == 1}">
     <form action="${contextUrl}admin/orders/${order.id}?status=2" method="post" style="display:inline">
         <input type="submit" value="Delivered"/>
     </form>

@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -34,7 +35,10 @@
             <td><c:out value="${order.firstName} ${order.lastName}"/></td>
             <td>${order.contactPhoneNo}</td>
             <td>${order.deliveryAddress}</td>
-            <td>${order.date}</td>
+            <td>
+                <fmt:parseDate value="${order.orderDate}" pattern="yyyy-MM-dd'T'HH:mm:ss" var="parsedDate" type="both" />
+                <fmt:formatDate value="${parsedDate}" pattern="dd.MM.yyyy HH:mm"/>
+            </td>
             <td>${order.totalPrice}$</td>
             <td>${order.status}</td>
         </tr>

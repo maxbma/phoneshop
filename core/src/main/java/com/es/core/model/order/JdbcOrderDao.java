@@ -1,6 +1,5 @@
 package com.es.core.model.order;
 
-import com.es.core.model.stock.StockDao;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -10,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +23,8 @@ public class JdbcOrderDao implements OrderDao{
     private final static String UPDATE_ORDER_STATUS = "update orders set statusId = ? where id = ?";
     private final static String UPDATE_STOCK_STATUS_DELIVERED = "update stocks set stock = stock - ?, reserved = reserved - ? where phoneId = ?";
     private final static String UPDATE_STOCK_STATUS_REJECTED = "update stocks set reserved = reserved - ? where phoneId = ?";
+    private final static String CHECK_IF_ORDER_EXISTS = "select count(*) from orders where id = ?";
+    private final static String SELECT_ORDER_STATUS_ID = "select statusId from orders where id = ?";
 
     @Resource
     private JdbcTemplate jdbcTemplate;
@@ -43,7 +44,7 @@ public class JdbcOrderDao implements OrderDao{
     @Override
     @Transactional
     public void insertOrder(Order order) {
-        order.setDate(new Timestamp(System.currentTimeMillis()));
+        order.setOrderDate(LocalDateTime.now());
         Long orderId = (jdbcInsert.executeAndReturnKey(new BeanPropertySqlParameterSource(order))).longValue();
         order.setId(orderId);
         Object[] args = new Object[]{order.getStatus().getStatusId(), orderId};
@@ -70,6 +71,16 @@ public class JdbcOrderDao implements OrderDao{
             }
             jdbcTemplate.batchUpdate(UPDATE_STOCK_STATUS_REJECTED, batchArgs);
         }
+    }
+
+    @Override
+    public boolean exists(Long orderId) {
+        return jdbcTemplate.queryForObject(CHECK_IF_ORDER_EXISTS, new Object[]{orderId}, Integer.class) != 0;
+    }
+
+    @Override
+    public boolean isCurrentStatusNew(Long orderId) {
+        return jdbcTemplate.queryForObject(SELECT_ORDER_STATUS_ID, new Object[]{orderId}, Integer.class) == OrderStatus.NEW.getStatusId();
     }
 
     @Override
