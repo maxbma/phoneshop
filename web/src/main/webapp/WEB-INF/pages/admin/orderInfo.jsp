@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -89,9 +90,11 @@
 </a>
 <c:if test="${order.status.statusId == 1}">
     <form action="${contextUrl}admin/orders/${order.id}?status=2" method="post" style="display:inline">
+        <sec:csrfInput/>
         <input type="submit" value="Delivered"/>
     </form>
     <form action="${contextUrl}admin/orders/${order.id}?status=3" method="post" style="display:inline">
+        <sec:csrfInput/>
         <input type="submit" value="Rejected"/>
     </form>
 </c:if>
