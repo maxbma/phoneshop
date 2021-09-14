@@ -31,20 +31,6 @@
     <sec:authorize access="hasRole('ROLE_ADMIN')">
         <a href="${contextUrl}admin/orders">Admin</a>
     </sec:authorize>
-<%--    <c:choose>--%>
-<%--        <c:when test="${not empty pageContext.request.userPrincipal.name}">--%>
-<%--            <form action="${logoutUrl}" method="post">--%>
-<%--                <input value="Logout" type="submit"/>--%>
-<%--                <sec:csrfInput/>--%>
-<%--            </form>--%>
-<%--            <sec:authorize access="hasRole('ROLE_ADMIN')">--%>
-<%--                <a href="${contextUrl}admin/orders">Admin</a>--%>
-<%--            </sec:authorize>--%>
-<%--        </c:when>--%>
-<%--        <c:otherwise>--%>
-<%--            <a href="${contextUrl}login">Login</a>--%>
-<%--        </c:otherwise>--%>
-<%--    </c:choose>--%>
 </p>
 <br/>
 <hr/>
