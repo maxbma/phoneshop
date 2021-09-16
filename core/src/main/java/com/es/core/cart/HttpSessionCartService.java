@@ -1,5 +1,6 @@
 package com.es.core.cart;
 
+import com.es.core.model.order.QuickOrderItem;
 import com.es.core.model.phone.JdbcPhoneDao;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.stock.JdbcStockDao;
@@ -11,10 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -89,6 +87,45 @@ public class HttpSessionCartService implements CartService {
             }
             if(itemNumbersWithException.size() != 0) throw new OutOfStockException(itemNumbersWithException, "Out of stock");
             prevCart.putAll(toPut);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void quickAdd(List<QuickOrderItem> items) throws OutOfStockException{
+        Map<Long, Long> toPut = new HashMap<>();
+        Map<Long, QuickOrderItem> itemMap = new LinkedHashMap<>();
+        List<Stock> stocks = new ArrayList<>();
+        List<Integer> itemNumbersWithException = new ArrayList<>();
+        for(QuickOrderItem item : items){
+            if(item.getQuantity() == null && item.getPhoneModel().isBlank()) continue;
+            stocks.add(stockDao.getStockByModel(item.getPhoneModel()));
+        }
+        Map<Long, Stock> stockMap = new HashMap<>(stocks.size());
+        stocks.forEach(stock -> stockMap.put(stock.getPhoneId(), stock));
+        List<Phone> phoneList = phoneDao.getPhonesById(new ArrayList<>(stockMap.keySet()));
+        phoneList.forEach(phone -> itemMap.put(phone.getId(), items.stream().filter(p -> p.getPhoneModel().equals(phone.getModel())).findFirst().get()));
+        lock.lock();
+        try{
+            Map<Long, Long> prevCart = cart.getItems();
+            int itemNumberInCart = 0;
+            for(Map.Entry<Long, QuickOrderItem> entry : itemMap.entrySet()){
+                long phoneId = entry.getKey();
+                long quantity = entry.getValue().getQuantity();
+                int stockAmount = stockMap.get(entry.getKey()).getStock() - stockMap.get(entry.getKey()).getReserved();
+                if(!isEnoughStock(phoneId, quantity, stockAmount)){
+                    itemNumbersWithException.add(itemNumberInCart);
+                    itemNumberInCart++;
+                    continue;
+                }
+                Long previousQuantity = prevCart.get(phoneId);
+                if(previousQuantity == null) previousQuantity = 0L;
+                toPut.put(phoneId, previousQuantity + quantity);
+                items.remove(entry.getValue());
+            }
+            prevCart.putAll(toPut);
+            if(itemNumbersWithException.size() != 0) throw new OutOfStockException(itemNumbersWithException, "Out of stock");
         } finally {
             lock.unlock();
         }

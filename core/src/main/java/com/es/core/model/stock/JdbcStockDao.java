@@ -12,6 +12,7 @@ public class JdbcStockDao implements StockDao{
     private static final String UPDATE_PHONE_STOCK = "update stocks set reserved = reserved + ? where phoneId = ?";
     private static final String SELECT_STOCK_LIST = "select stock, reserved, phoneId from stocks where phoneId in (%s)";
     private static final String SELECT_PHONE_STOCK = "select stock - reserved from stocks where phoneId = ?";
+    private static final String SELECT_STOCK_BY_PHONE_MODEL = "select stock, reserved, phoneId from stocks join phones on stocks.phoneId = phones.id where upper(phones.model) like upper(?)";
 
     @Resource
     private JdbcTemplate jdbcTemplate;
@@ -42,6 +43,11 @@ public class JdbcStockDao implements StockDao{
             String sql = String.format(SELECT_STOCK_LIST, sb);
             return jdbcTemplate.query(sql, stockMapper);
         }
+    }
+
+    @Override
+    public Stock getStockByModel(String phoneModel) {
+        return jdbcTemplate.queryForObject(SELECT_STOCK_BY_PHONE_MODEL, new Object[]{phoneModel}, stockMapper);
     }
 
     @Override

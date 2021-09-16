@@ -1,5 +1,6 @@
 package com.es.core.cart;
 
+import com.es.core.model.order.QuickOrderItem;
 import com.es.core.model.phone.Phone;
 import com.es.core.order.OutOfStockException;
 
@@ -11,6 +12,7 @@ public interface CartService {
     Cart getCart();
     void addPhone(Long phoneId, Long quantity) throws OutOfStockException;
     void update(List<CartItem> items) throws OutOfStockException;
+    void quickAdd(List<QuickOrderItem> items) throws OutOfStockException;
     void updateStocks(Map<Long,Long> items);
     void remove(Long phoneId);
     void cleanCart(Map<Long,Long> items);
